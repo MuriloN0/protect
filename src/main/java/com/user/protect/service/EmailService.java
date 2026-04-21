@@ -18,4 +18,18 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void sendPasswordResetEmail(String toEmail, String token) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Recuperação de Senha - Sistema Protect");
+
+        String resetUrl = "http://localhost:8080/reset-password?token=" + token;
+
+        message.setText("Você solicitou a recuperação de senha.\n" +
+                "Clique no link abaixo para redefinir sua senha (válido por 15 minutos):\n" +
+                resetUrl);
+
+        mailSender.send(message);
+    }
 }
