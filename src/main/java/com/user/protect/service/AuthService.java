@@ -6,19 +6,24 @@ import com.user.protect.dto.Verify2FaDTO;
 import com.user.protect.entity.RevokedToken;
 import com.user.protect.entity.User;
 import com.user.protect.repository.UserRepository;
-import com.user.protect.repository.RevokedTokenRepository; // Importação necessária
+import com.user.protect.repository.RevokedTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
     private final UserRepository userRepository;
-    private final RevokedTokenRepository revokedTokenRepository; // Adicionado para injeção via Lombok
+    private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final EmailService emailService;
@@ -30,7 +35,6 @@ public class AuthService {
         User user = userRepository.findByEmail(loginDTO.email())
                 .orElseThrow(() -> new IllegalArgumentException("Usuário ou senha incorretos"));
 
-        // 1. Verifica se a conta está bloqueada
         if (Boolean.FALSE.equals(user.getAccountNonLocked())) {
             if (user.getLockTime() != null && user.getLockTime().plusMinutes(LOCK_TIME_DURATION_MINUTES).isBefore(LocalDateTime.now())) {
                 user.setAccountNonLocked(true);
@@ -42,13 +46,11 @@ public class AuthService {
             }
         }
 
-        // 2. Valida a senha
         if (!passwordEncoder.matches(loginDTO.password(), user.getPassword())) {
             updateFailedAttempts(user);
             throw new IllegalArgumentException("Usuário ou senha incorretos");
         }
 
-        // 3. Sucesso na senha: Reseta tentativas e gera 2FA
         user.setFailedAttempts(0);
 
         SecureRandom random = new SecureRandom();
@@ -82,7 +84,6 @@ public class AuthService {
     }
 
     private void updateFailedAttempts(User user) {
-        // Garante que não operamos sobre null se o banco tiver dados antigos
         int currentAttempts = (user.getFailedAttempts() == null) ? 0 : user.getFailedAttempts();
         int newAttempts = currentAttempts + 1;
 
@@ -97,16 +98,59 @@ public class AuthService {
     }
 
     public void logout(String token) {
-        // Remove o prefixo "Bearer " caso ele venha no cabeçalho
         String cleanToken = token.replace("Bearer ", "");
 
         RevokedToken revokedToken = new RevokedToken();
         revokedToken.setToken(cleanToken);
-
-        // Define a expiração da entrada na blacklist.
-        // Como o seu JWT dura 15 min, após esse tempo o registro pode ser deletado do banco por um robô de limpeza.
         revokedToken.setExpirationDate(LocalDateTime.now().plusMinutes(15));
 
         revokedTokenRepository.save(revokedToken);
+    }
+
+    public void requestPasswordReset(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            log.warn("AUDIT - Tentativa de recuperação de senha para e-mail inexistente: {}", email);
+            return;
+        }
+
+        User user = userOpt.get();
+        String token = UUID.randomUUID().toString();
+
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiration(LocalDateTime.now().plusMinutes(15));
+
+        userRepository.save(user);
+        emailService.sendPasswordResetEmail(user.getEmail(), token); // Crie este método no EmailService
+
+        log.info("AUDIT - Token de recuperação de senha gerado com sucesso para o usuário: {}", email);
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        Optional<User> userOpt = userRepository.findByResetPasswordToken(token);
+
+        if (userOpt.isEmpty()) {
+            log.error("AUDIT - Falha na redefinição de senha: Token inválido ou não encontrado.");
+            throw new IllegalArgumentException("Token inválido ou expirado.");
+        }
+
+        User user = userOpt.get();
+
+        if (user.getResetPasswordTokenExpiration().isBefore(LocalDateTime.now())) {
+            log.error("AUDIT - Falha na redefinição de senha: Token expirado para o usuário: {}", user.getEmail());
+            throw new IllegalArgumentException("Token expirado.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiration(null);
+
+        user.setAccountNonLocked(true);
+        user.setFailedAttempts(0);
+        user.setLockTime(null);
+
+        userRepository.save(user);
+        log.info("AUDIT - Senha redefinida com sucesso para o usuário: {}", user.getEmail());
     }
 }

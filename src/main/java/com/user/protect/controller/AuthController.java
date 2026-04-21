@@ -48,4 +48,21 @@ public class AuthController {
         if (authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordDTO request) {
+        // Sempre retorna a mesma mensagem para evitar enumeração de usuários (OWASP)
+        authService.requestPasswordReset(request.email());
+        return ResponseEntity.ok("Se o e-mail estiver cadastrado, você receberá um link de recuperação em breve.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordDTO request) {
+        try {
+            authService.resetPassword(request.token(), request.newPassword());
+            return ResponseEntity.ok("Senha redefinida com sucesso.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

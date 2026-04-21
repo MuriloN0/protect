@@ -62,4 +62,10 @@ public class User {
 
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiration")
+    private LocalDateTime resetPasswordTokenExpiration;
 }
