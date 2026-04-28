@@ -122,7 +122,7 @@ public class AuthService {
         user.setResetPasswordTokenExpiration(LocalDateTime.now().plusMinutes(15));
 
         userRepository.save(user);
-        emailService.sendPasswordResetEmail(user.getEmail(), token); // Crie este método no EmailService
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
 
         log.info("AUDIT - Token de recuperação de senha gerado com sucesso para o usuário: {}", email);
     }
