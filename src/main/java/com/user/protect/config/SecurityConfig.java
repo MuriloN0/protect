@@ -28,13 +28,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/users/add").permitAll()
-
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/verify-2fa").permitAll()
-
                         .requestMatchers(HttpMethod.POST, "/api/auth/forgot-password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

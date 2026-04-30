@@ -26,14 +26,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // Alterado para Boolean (Wrapper) para suportar nulos do banco se necessário
     @Column(name = "mfa_enable", nullable = false)
     private Boolean mfaEnabled = false;
 
     @Column(name = "mfa_secret")
     private String mfaSecret;
 
-    // Alterado para Integer
     @Column(name = "failed_login_attemps", nullable = false)
     private Integer failedLoginAttempts = 0;
 
