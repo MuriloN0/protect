@@ -35,7 +35,6 @@ public class UserService {
         return mapToDTO(savedUser);
     }
 
-    //Método auxiliar
     private UserResponseDTO mapToDTO(User user) {
         return new UserResponseDTO(
                 user.getId(),

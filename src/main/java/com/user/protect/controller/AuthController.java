@@ -49,7 +49,6 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordDTO request) {
-        // Sempre retorna a mesma mensagem para evitar enumeração de usuários (OWASP)
         authService.requestPasswordReset(request.email());
         return ResponseEntity.ok("Se o e-mail estiver cadastrado, você receberá um link de recuperação em breve.");
     }
