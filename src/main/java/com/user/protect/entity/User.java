@@ -26,21 +26,17 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // TEM valor inicial, ENTÃO USA @Builder.Default
-    @Builder.Default
-    @Column(name = "mfa_enable", nullable = false)
+   @Builder.Default
+    @Column(name = "mfa_enabled", nullable = false)
     private Boolean mfaEnabled = false;
 
-    // NÃO TEM valor inicial, ENTÃO NÃO USA a anotação
     @Column(name = "mfa_secret")
     private String mfaSecret;
 
-    // TEM valor inicial, ENTÃO USA @Builder.Default
     @Builder.Default
-    @Column(name = "failed_login_attemps", nullable = false)
+    @Column(name = "failed_login_attempts", nullable = false)
     private Integer failedLoginAttempts = 0;
 
-    // NÃO TEM valor inicial, ENTÃO NÃO USA a anotação
     @Column(name = "account_locked_until")
     private LocalDateTime accountLockedUntil;
 

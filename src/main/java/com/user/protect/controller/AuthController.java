@@ -2,7 +2,7 @@ package com.user.protect.controller;
 
 import com.user.protect.dto.*;
 import com.user.protect.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest; // Importante para recuperar o Header
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +49,7 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordDTO request) {
+        // Sempre retorna a mesma mensagem para evitar enumeração de usuários (OWASP)
         authService.requestPasswordReset(request.email());
         return ResponseEntity.ok("Se o e-mail estiver cadastrado, você receberá um link de recuperação em breve.");
     }

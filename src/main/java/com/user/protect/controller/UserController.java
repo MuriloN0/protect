@@ -2,7 +2,6 @@ package com.user.protect.controller;
 
 import com.user.protect.dto.UserCreateDTO;
 import com.user.protect.dto.UserResponseDTO;
-import com.user.protect.repository.UserRepository;
 import com.user.protect.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

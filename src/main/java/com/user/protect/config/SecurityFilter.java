@@ -28,13 +28,11 @@ public class SecurityFilter extends OncePerRequestFilter {
         var token = this.recoverToken(request);
 
         if (token != null) {
-            //Verificação se o token foi revogado/deslogado?
             if (revokedTokenRepository.existsByToken(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return; // Encerra o fluxo da requisição aqui
+                return;
             }
 
-            //Validação padrão do JWT
             var email = tokenService.validateToken(token);
 
             if (!email.isEmpty()) {
