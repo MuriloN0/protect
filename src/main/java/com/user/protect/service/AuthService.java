@@ -9,6 +9,7 @@ import com.user.protect.repository.UserRepository;
 import com.user.protect.repository.RevokedTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final EmailService emailService;
+
+    @Value("${app.frontend.url:http://localhost:4200}")
+    private String frontendUrl;
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long LOCK_TIME_DURATION_MINUTES = 15;
@@ -120,9 +124,10 @@ public class AuthService {
 
         user.setResetPasswordToken(token);
         user.setResetPasswordTokenExpiration(LocalDateTime.now().plusMinutes(15));
-
         userRepository.save(user);
-        emailService.sendPasswordResetEmail(user.getEmail(), token); // Crie este método no EmailService
+
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
 
         log.info("AUDIT - Token de recuperação de senha gerado com sucesso para o usuário: {}", email);
     }

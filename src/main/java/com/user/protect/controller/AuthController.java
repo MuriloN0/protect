@@ -1,8 +1,6 @@
 package com.user.protect.controller;
 
-import com.user.protect.dto.LoginDTO;
-import com.user.protect.dto.TokenResponseDTO;
-import com.user.protect.dto.Verify2FaDTO;
+import com.user.protect.dto.*;
 import com.user.protect.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest; // Importante para recuperar o Header
 import jakarta.validation.Valid;

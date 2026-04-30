@@ -26,17 +26,21 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // Alterado para Boolean (Wrapper) para suportar nulos do banco se necessário
+    // TEM valor inicial, ENTÃO USA @Builder.Default
+    @Builder.Default
     @Column(name = "mfa_enable", nullable = false)
     private Boolean mfaEnabled = false;
 
+    // NÃO TEM valor inicial, ENTÃO NÃO USA a anotação
     @Column(name = "mfa_secret")
     private String mfaSecret;
 
-    // Alterado para Integer
+    // TEM valor inicial, ENTÃO USA @Builder.Default
+    @Builder.Default
     @Column(name = "failed_login_attemps", nullable = false)
     private Integer failedLoginAttempts = 0;
 
+    // NÃO TEM valor inicial, ENTÃO NÃO USA a anotação
     @Column(name = "account_locked_until")
     private LocalDateTime accountLockedUntil;
 
@@ -54,9 +58,13 @@ public class User {
     @Column(name = "two_factor_expires_at")
     private LocalDateTime twoFactorExpiresAt;
 
+    // TEM valor inicial, ENTÃO USA @Builder.Default
+    @Builder.Default
     @Column(name = "failed_attempts", nullable = false)
     private Integer failedAttempts = 0;
 
+    // TEM valor inicial, ENTÃO USA @Builder.Default
+    @Builder.Default
     @Column(name = "account_non_locked", nullable = false)
     private Boolean accountNonLocked = true;
 
